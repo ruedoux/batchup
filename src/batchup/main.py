@@ -21,13 +21,6 @@ def run(args: Namespace) -> None:
         exit(1)
 
     config = Config(config_path)
-
-    password: str = os.environ.get("RESTIC_PASSWORD", "")
-    if args.accept is False:
-        password = getpass.getpass("Input password: ")
-    if args.remote and args.accept:
-        RemoteBackup(logger).run(config, password)
-
     with tempfile.TemporaryDirectory() as temp_dir_path:
         root_path = config.root_path
         local_backup_name = config.local_backup_name
@@ -55,6 +48,7 @@ def run(args: Namespace) -> None:
         logger.info("Copy external targets:")
         for backup_path in external_backup_paths:
             logger.info(f"\t{backup_path}")
+        password = getpass.getpass("Input password: ")
 
         backup_creator = BackupCreator(logger=logger)
         backup_creator.backup_local(
@@ -63,8 +57,11 @@ def run(args: Namespace) -> None:
             include_file_path=include_file_path,
             exclude_file_path=exclude_file_path,
             password=password,
-            accept=args.accept,
         )
+
+        if args.remote:
+            RemoteBackup(logger).run(config)
+
         backup_creator.backup_remote(
             root_path=root_path,
             local_backup_name=local_backup_name,
@@ -85,12 +82,6 @@ def parse_commands() -> None:
     )
     main_parser.add_argument(
         "-r", "--remote", action="store_true", help="Run backup remotely"
-    )
-    main_parser.add_argument(
-        "-a",
-        "--accept",
-        action="store_true",
-        help="Run without user input, agree to everything and use env password.",
     )
     parser = argparse.ArgumentParser(
         description="A toolset for GNU/Linux",

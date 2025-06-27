@@ -18,7 +18,6 @@ class BackupCreator:
         include_file_path: str,
         exclude_file_path: str,
         password: str,
-        accept: bool,
     ) -> None:
         if not os.path.exists(include_file_path):
             self.logger.error(f"File does not exist '{include_file_path}'")
@@ -36,7 +35,6 @@ class BackupCreator:
             include_file_path=include_file_path,
             exclude_file_path=exclude_file_path,
             password=password,
-            accept=accept,
         ):
             self.logger.error("Failed to create restic backup. Aborting.")
             exit(1)

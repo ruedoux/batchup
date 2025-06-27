@@ -25,7 +25,7 @@ def run(args: Namespace) -> None:
     password: str = os.environ.get("RESTIC_PASSWORD", "")
     if args.accept is False:
         password = getpass.getpass("Input password: ")
-    if args.remote and args.a:
+    if args.remote and args.accept:
         RemoteBackup(logger).run(config, password)
 
     with tempfile.TemporaryDirectory() as temp_dir_path:

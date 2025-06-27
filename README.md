@@ -1,4 +1,4 @@
-# linux-toolset
+# Batchup
 
 Utility tool made in Python to simplify batch backup on multiple machines.
 

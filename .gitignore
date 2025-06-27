@@ -1,0 +1,8 @@
+# Byte-compiled / cache
+*.py[cod]
+__pycache__
+
+# Packaging
+build
+dist
+*.egg-info

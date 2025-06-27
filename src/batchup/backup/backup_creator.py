@@ -1,9 +1,9 @@
-import getpass
 import os
 import subprocess
 
 from batchup.backup.restic import Restic
 from batchup.logger import SimpleLogger
+from batchup.utils import Utils
 
 
 class BackupCreator:
@@ -11,13 +11,14 @@ class BackupCreator:
         self.logger = logger
         self.restic = Restic(logger)
 
-    def backup(
+    def backup_local(
         self,
         root_path: str,
         local_backup_name: str,
-        external_backup_paths: list[str],
         include_file_path: str,
         exclude_file_path: str,
+        password: str,
+        accept: bool,
     ) -> None:
         if not os.path.exists(include_file_path):
             self.logger.error(f"File does not exist '{include_file_path}'")
@@ -28,7 +29,6 @@ class BackupCreator:
 
         self._check_root_directory(root_path)
 
-        password = getpass.getpass("Input password: ")
         backup_target_path = os.path.join(root_path, local_backup_name)
 
         if not self.restic.backup_repository(
@@ -36,9 +36,16 @@ class BackupCreator:
             include_file_path=include_file_path,
             exclude_file_path=exclude_file_path,
             password=password,
+            accept=accept,
         ):
             self.logger.error("Failed to create restic backup. Aborting.")
             exit(1)
+
+    def backup_remote(
+        self, root_path: str, local_backup_name: str, external_backup_paths: list[str]
+    ) -> None:
+        self._check_root_directory(root_path)
+        backup_target_path = os.path.join(root_path, local_backup_name)
 
         self._pull_remote_repositories(
             root_path, local_backup_name, external_backup_paths
@@ -62,8 +69,14 @@ class BackupCreator:
             self.logger.info("No remote repositories, skipping pull.")
             return
 
-        self.logger.info("Pulling remote repositories to local repository...")
+        self.logger.info(msg="Pulling remote repositories to local repository...")
         for external_backup_path in external_backup_paths:
+            if not Utils.has_server_connection(external_backup_path):
+                self.logger.error(
+                    f"Could not establish connection to: '{external_backup_path}'"
+                )
+                continue
+
             external_repo_names = self._get_repositories_from_root(external_backup_path)
             if local_backup_name in external_repo_names:
                 external_repo_names.remove(local_backup_name)
@@ -89,6 +102,12 @@ class BackupCreator:
 
         self.logger.info("> Pushing local repo to remote repos...")
         for external_backup_path in external_backup_paths:
+            if not Utils.has_server_connection(external_backup_path):
+                self.logger.error(
+                    f"Could not establish connection to: '{external_backup_path}'"
+                )
+                continue
+
             from_path = backup_target_path
             destination_path = os.path.join(external_backup_path, local_backup_name)
             self.logger.info(f"-> Pushing from {from_path} to {destination_path}")

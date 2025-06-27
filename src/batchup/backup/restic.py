@@ -14,8 +14,9 @@ class Restic:
         include_file_path: str,
         exclude_file_path: str,
         password: str,
+        accept: bool,
     ) -> bool:
-        if not self._verify_restic_repo(backup_target_path, password):
+        if not self._verify_restic_repo(backup_target_path, password, accept):
             self.logger.error("No restic repo found and not created.")
             return False
         if not self._verify_password(backup_target_path, password):
@@ -65,11 +66,13 @@ class Restic:
             os.environ["RESTIC_PASSWORD"] = ""
         return True
 
-    def _verify_restic_repo(self, backup_target_path: str, password: str) -> bool:
+    def _verify_restic_repo(
+        self, backup_target_path: str, password: str, accept: bool
+    ) -> bool:
         if not os.path.isfile(os.path.join(backup_target_path, "config")):
             self.logger.warning(f"No repo detected at: {backup_target_path}")
             answer = input("Do you want to create a new repo? [Y/n] ").strip().lower()
-            if answer and answer != "y":
+            if answer and answer != "y" and not accept:
                 return False
             self._create_new_repo(backup_target_path, password)
         return True

@@ -27,12 +27,18 @@ class RemoteBackup:
             f"cd {REPO_DIR} && "
             f"if [ ! -d {REPO_NAME} ]; then git clone {REPO_LINK}; fi && "
             f"cd {REPO_NAME} && "
+            f"git fetch && git pull &&"
             f"python -m venv .venv && "
             f". .venv/bin/activate && "
             f"pip install . && "
             f"batchup backup"
         )
+        self.logger.info("-" * 16)
         self.logger.info(f"Running backup on server: {remote_server}")
+        self.logger.info("-" * 16)
         return_code = os.system(f"ssh -t {remote_server} \"bash -c '{command}'\"")
         if return_code != 0:
             self.logger.error(f"Backup failed on server: {remote_server}")
+        self.logger.info("-" * 16)
+        self.logger.info(f"Finished backup on server: {remote_server}")
+        self.logger.info("-" * 16)

@@ -48,7 +48,7 @@ class BackupCreator:
         self._pull_remote_repositories(
             root_path, local_backup_name, external_backup_paths
         )
-        self._push_local_repository(
+        self._push_local_repositories(
             backup_target_path=backup_target_path,
             local_backup_name=local_backup_name,
             external_backup_paths=external_backup_paths,
@@ -88,7 +88,7 @@ class BackupCreator:
                 self.logger.info(f"-> Pulling from {from_path} to {destination_path}")
                 self._copy(from_path, destination_path)
 
-    def _push_local_repository(
+    def _push_local_repositories(
         self,
         backup_target_path: str,
         local_backup_name: str,

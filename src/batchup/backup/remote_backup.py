@@ -11,7 +11,7 @@ class RemoteBackup:
         self.logger = logger
 
     def run(self, config: Config) -> None:
-        for external_backup_path in config.external_backup_paths:
+        for external_backup_path in config.remote_backup_paths:
             remote_server = Utils.get_server_from_path(external_backup_path)
             if not Utils.check_ssh_connection(remote_server):
                 self.logger.error(

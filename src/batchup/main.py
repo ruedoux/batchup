@@ -7,7 +7,7 @@ from batchup.backup.backup_creator import BackupCreator
 from batchup.config import Config
 from batchup.init import Init
 from batchup.logger import SimpleLogger
-from batchup.remote_backup import RemoteBackup
+from batchup.backup.remote_backup import RemoteBackup
 
 
 logger = SimpleLogger(level="DEBUG")
@@ -22,9 +22,9 @@ def run(args: Namespace) -> None:
 
     config = Config(config_path)
     with tempfile.TemporaryDirectory() as temp_dir_path:
-        root_path = config.root_path
+        local_backup_path = config.local_backup_path
         local_backup_name = config.local_backup_name
-        external_backup_paths = config.external_backup_paths
+        remote_backup_paths = config.remote_backup_paths
         include_file_path = f"{temp_dir_path}/i.txt"
         exclude_file_path = f"{temp_dir_path}/e.txt"
         includes = config.includes.copy()
@@ -38,21 +38,21 @@ def run(args: Namespace) -> None:
             for line in excludes:
                 f.write(line + "\n")
 
-        logger.info(f"Local target: {config.root_path}")
+        logger.info(f"Local backup path: {config.local_backup_path}")
         logger.info("Local include paths:")
         for path in includes:
             logger.info(f"\t{path}")
         logger.info("Local exclude paths:")
         for path in excludes:
             logger.info(f"\t{path}")
-        logger.info("Copy external targets:")
-        for backup_path in external_backup_paths:
+        logger.info("Remote targets:")
+        for backup_path in remote_backup_paths:
             logger.info(f"\t{backup_path}")
         password = getpass.getpass("Input password: ")
 
         backup_creator = BackupCreator(logger=logger)
         backup_creator.backup_local(
-            root_path=root_path,
+            local_backup_path=local_backup_path,
             local_backup_name=local_backup_name,
             include_file_path=include_file_path,
             exclude_file_path=exclude_file_path,
@@ -63,9 +63,9 @@ def run(args: Namespace) -> None:
             RemoteBackup(logger).run(config)
 
         backup_creator.backup_remote(
-            root_path=root_path,
+            local_backup_path=local_backup_path,
             local_backup_name=local_backup_name,
-            external_backup_paths=external_backup_paths,
+            remote_backup_paths=remote_backup_paths,
         )
 
     logger.info(f"Done!")

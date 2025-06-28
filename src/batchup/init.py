@@ -7,9 +7,9 @@ from batchup.logger import SimpleLogger
 class Init:
     _EXAMPLE_CONFIGURATION = """
 {
-  "root-path": "/mnt/backup/bck",
+  "local_backup_path": "/mnt/backup/bck",
   "local-backup-name": "pc",
-  "external-backup-paths": ["myserver:/mnt/backup/bck"],
+  "remote-backup-paths": ["myserver:/mnt/backup/bck"],
   "includes": ["/home/name/files"],
   "excludes": ["/home/name/files/videos"],
   "exclude-templates": [

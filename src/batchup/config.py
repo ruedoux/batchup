@@ -4,9 +4,9 @@ import os
 
 
 class Config:
-    root_path: str
+    local_backup_path: str
     local_backup_name: str
-    external_backup_paths: list[str]
+    remote_backup_paths: list[str]
     includes: list[str]
     excludes: list[str]
     exclude_templates: list[str]
@@ -16,9 +16,9 @@ class Config:
         with open(config_path) as f:
             json_dict = json.load(fp=f)
 
-        self.root_path = json_dict["root-path"]
+        self.local_backup_path = json_dict["local_backup_path"]
         self.local_backup_name = json_dict["local-backup-name"]
-        self.external_backup_paths = json_dict.get("external-backup-paths", [])
+        self.remote_backup_paths = json_dict.get("remote-backup-paths", [])
         self.includes = json_dict.get("includes", [])
         self.excludes = json_dict.get("excludes", [])
         self.exclude_templates = json_dict.get("exclude-templates", [])

@@ -16,7 +16,7 @@ class Config:
         with open(config_path) as f:
             json_dict = json.load(fp=f)
 
-        self.local_backup_path = json_dict["local_backup_path"]
+        self.local_backup_path = json_dict["local-backup-path"]
         self.local_backup_name = json_dict["local-backup-name"]
         self.remote_backup_paths = json_dict.get("remote-backup-paths", [])
         self.includes = json_dict.get("includes", [])

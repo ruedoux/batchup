@@ -6,7 +6,12 @@ class Utils:
     @staticmethod
     def check_ssh_connection(remote_server: str) -> bool:
         try:
-            subprocess.run(["ssh", remote_server, "echo"], check=True)
+            subprocess.run(
+                ["ssh", remote_server, "echo"],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             return True
         except:
             return False

@@ -37,21 +37,7 @@ class BackupCreator:
             self.logger.error("Failed to create restic backup. Aborting.")
             exit(1)
 
-    def backup_remote(
-        self,
-        local_backup_path: str,
-        local_backup_name: str,
-        remote_backup_paths: list[str],
-    ) -> None:
-        self._pull_remote_repositories(
-            local_backup_path, local_backup_name, remote_backup_paths
-        )
-        self._push_local_repositories(
-            local_backup_path=local_backup_path,
-            remote_backup_paths=remote_backup_paths,
-        )
-
-    def _pull_remote_repositories(
+    def pull_remote_repositories(
         self,
         local_backup_path: str,
         local_backup_name: str,
@@ -85,7 +71,7 @@ class BackupCreator:
                 self.logger.info(f"-> Pulling from {from_path} to {destination_path}")
                 self._copy(from_path, destination_path)
 
-    def _push_local_repositories(
+    def push_local_repositories(
         self, local_backup_path: str, remote_backup_paths: list[str]
     ) -> None:
         if len(remote_backup_paths) == 0:

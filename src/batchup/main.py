@@ -1,106 +1,16 @@
-from argparse import Namespace
-import argparse
-import getpass
-import os
-import tempfile
-from batchup.backup.backup_creator import BackupCreator
-from batchup.config import Config
+from batchup.commands import Commands
 from batchup.init import Init
 from batchup.logger import SimpleLogger
-from batchup.backup.remote_backup import RemoteBackup
 
 
-logger = SimpleLogger(level="DEBUG")
-
-
-def run(args: Namespace) -> None:
-    logger.info(f"Running backup...")
-    config_path: str = args.config
-    if not os.path.isfile(config_path):
-        logger.error(f"Configuration does not exist: {config_path}")
-        exit(1)
-
-    config = Config(config_path)
-    with tempfile.TemporaryDirectory() as temp_dir_path:
-        local_backup_path = config.local_backup_path
-        local_backup_name = config.local_backup_name
-        remote_backup_paths = config.remote_backup_paths
-        include_file_path = f"{temp_dir_path}/i.txt"
-        exclude_file_path = f"{temp_dir_path}/e.txt"
-        includes = config.includes.copy()
-        excludes = config.excludes.copy()
-
-        excludes = excludes + config.matched_excludes
-        with open(include_file_path, "w") as f:
-            for line in includes:
-                f.write(line + "\n")
-        with open(exclude_file_path, "w") as f:
-            for line in excludes:
-                f.write(line + "\n")
-
-        logger.info(f"Local backup path: {config.local_backup_path}")
-        logger.info("Local include paths:")
-        for path in includes:
-            logger.info(f"\t{path}")
-        logger.info("Local exclude paths:")
-        for path in excludes:
-            logger.info(f"\t{path}")
-        logger.info("Remote targets:")
-        for backup_path in remote_backup_paths:
-            logger.info(f"\t{backup_path}")
-        password = getpass.getpass("Input password: ")
-
-        backup_creator = BackupCreator(logger=logger)
-        backup_creator.backup_local(
-            local_backup_path=local_backup_path,
-            local_backup_name=local_backup_name,
-            include_file_path=include_file_path,
-            exclude_file_path=exclude_file_path,
-            password=password,
-        )
-
-        if args.remote:
-            RemoteBackup(logger).run(config)
-
-        backup_creator.backup_remote(
-            local_backup_path=local_backup_path,
-            local_backup_name=local_backup_name,
-            remote_backup_paths=remote_backup_paths,
-        )
-
-    logger.info(f"Done!")
-
-
-def parse_commands() -> None:
-    home_dir = os.path.expanduser("~")
-    dir_path = os.path.join(home_dir, ".config", "batchup")
-    default_config_path = os.path.join(dir_path, "config.json")
-
-    main_parser = argparse.ArgumentParser(add_help=False)
-    main_parser.add_argument(
-        "-c", "--config", default=default_config_path, help="Path to config file"
-    )
-    main_parser.add_argument(
-        "-r", "--remote", action="store_true", help="Run backup remotely"
-    )
-    parser = argparse.ArgumentParser(
-        description="A toolset for GNU/Linux",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    backup_parser = subparsers.add_parser(
-        "backup", parents=[main_parser], help="Run the backup routine"
-    )
-    backup_parser.set_defaults(func=run)
-    args = parser.parse_args()
-    args.func(args)
+logger = SimpleLogger(level="INFO")
 
 
 def main() -> None:
     init = Init(logger)
     init.check_requirements()
     init.prepare_config()
-    parse_commands()
+    Commands(logger).parse_commands()
 
 
 if __name__ == "__main__":

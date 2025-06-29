@@ -16,8 +16,17 @@ pip install .
 ## Usage
 
 ```sh
-# Performs a backup based on config.json
-batchup backup --config /path/to/config.json
+# Performs a local backup based on config.json
+batchup backup
+
+# Pulls remote repositories to local backup
+batchup pull
+
+# Pushes local repositories to remote backup
+batchup psuh
+
+# (Experimental) Runs "batchup backup" on remote targets
+batchup remote
 ```
 
 Example config.json:

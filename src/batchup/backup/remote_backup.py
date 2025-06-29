@@ -1,5 +1,4 @@
 import os
-import shlex
 from batchup.logger import SimpleLogger
 from batchup.config import Config
 from batchup.utils import Utils
@@ -23,20 +22,21 @@ class RemoteBackup:
         REPO_DIR = "/tmp"
         REPO_NAME = "batchup"
         REPO_LINK = "https://github.com/ruedoux/batchup.git"
-        command = shlex.quote(
+        command = (
             f"cd {REPO_DIR} && "
-            f"if [ ! -d {REPO_NAME} ]; then git clone {REPO_LINK}; fi && "
+            f"[ ! -d {REPO_NAME} ] && git clone {REPO_LINK} || true && "
             f"cd {REPO_NAME} && "
-            f"git fetch && git pull &&"
-            f"python -m venv .venv && "
+            f"git fetch && git pull && "
+            f"[ ! -d .venv ] && python -m venv .venv || true && "
             f". .venv/bin/activate && "
             f"pip install . && "
             f"batchup backup"
         )
+
         self.logger.info("-" * 16)
         self.logger.info(f"Running backup on server: {remote_server}")
         self.logger.info("-" * 16)
-        return_code = os.system(f"ssh -t {remote_server} \"bash -c '{command}'\"")
+        return_code = os.system(f'ssh -t {remote_server} "bash -c \\"{command}\\""')
         if return_code != 0:
             self.logger.error(f"Backup failed on server: {remote_server}")
         self.logger.info("-" * 16)
